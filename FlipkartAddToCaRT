@@ -1,0 +1,165 @@
+package A1;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import org.apache.commons.io.FileUtils;
+import org.apache.poi.sl.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.Select;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+import org.testng.annotations.Test;
+
+
+public class Auto1 { //Google Page
+	WebDriver driver;
+	public static File scrFile;
+	public static InputStream input;
+	public static Properties prop;
+	String search = null;
+	
+	@SuppressWarnings("deprecation")
+	@BeforeTest
+	public void GooglePage() throws InterruptedException, IOException{		
+		System.out.println("Before Test Started");
+		System.setProperty("webdriver.chrome.driver", "C:\\Selenium\\chromedriver.exe");
+		driver = new ChromeDriver();
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS);
+		
+	try {
+		input = new FileInputStream("locators.properties");
+		prop = new Properties();
+		prop.load(input);		
+	} 
+	catch(FileNotFoundException e) { 
+		e.printStackTrace();
+	}
+driver.get(prop.getProperty("url"));
+Thread.sleep(1000);
+	}
+
+@SuppressWarnings("deprecation")
+@Test ( priority = 2)	
+	public void FlipkartSearch() throws InterruptedException, IOException{  //Flipkart Search
+	
+	File file1 = new File("data.xlsx");
+	FileInputStream isStream = new FileInputStream(file1);
+	XSSFWorkbook w1 = new XSSFWorkbook(isStream);
+	XSSFSheet sheet = w1.getSheetAt(0);
+	XSSFRow row = sheet.getRow(0);
+	XSSFCell cell = row.getCell(0);
+	search = cell.getStringCellValue();
+	
+		WebElement X= driver.findElement(By.id(prop.getProperty("id")));
+		X.sendKeys(search);
+		Thread.sleep(1000);
+		WebElement S1 = driver.findElement(By.xpath(prop.getProperty("click1")));
+		S1.click();
+		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+}
+
+@Test ( priority = 3)
+public void FlipkartOpen() throws InterruptedException{ // Opening Flipkart
+		WebElement Y = driver.findElement(By.xpath(prop.getProperty("flipkart")));
+        String A = Y.getText();
+        System.out.println(A);
+        if( A.equals("https://www.flipkart.com")) {
+        	System.out.println("True");
+        	WebElement S2 = driver.findElement(By.xpath(prop.getProperty("click2")));
+        	S2.click();
+        	Thread.sleep(3000);
+        	driver.navigate().refresh();
+        }
+        else {
+        	System.out.print("False");
+        }
+	}
+
+@Test (priority = 4)
+public void CloseButton() throws InterruptedException{ // Closing X mark
+	
+	WebElement S3 = driver.findElement(By.xpath(prop.getProperty("close")));
+	S3.click();
+	Thread.sleep(2000);
+}
+
+@Test (priority = 5)
+public void searchFlipkart() throws InterruptedException {
+	driver.findElement(By.xpath(prop.getProperty("search2"))).sendKeys(prop.getProperty("search3"));
+	Thread.sleep(1000);
+	driver.findElement(By.xpath(prop.getProperty("click3"))).click();
+	Thread.sleep(1000);
+}
+
+@Test(priority = 6)
+public void sortBy() throws InterruptedException {
+	WebElement s1 = driver.findElement(By.xpath(prop.getProperty("sort1")));
+	Select select1 = new Select(s1);
+	select1.selectByValue("10000");
+	Thread.sleep(1000);
+	WebElement s2 = driver.findElement(By.xpath(prop.getProperty("sort2")));
+	Select select2 =  new Select(s2);
+	select2.selectByValue("15000");
+	Thread.sleep(1000);
+	driver.findElement(By.xpath(prop.getProperty("click4"))).click();
+	Thread.sleep(2000);
+}
+
+@Test (priority = 7)
+public void PageDown() throws InterruptedException {
+	JavascriptExecutor js1= (JavascriptExecutor) driver;
+	js1.executeScript("window.scrollBy(0,1000)"," ");
+	Thread.sleep(2000);
+}
+
+@Test(priority = 9)
+public void screenshot() throws InterruptedException, IOException {
+	TakesScreenshot tk = (TakesScreenshot)driver;
+	File src = tk.getScreenshotAs(OutputType.FILE);
+	File des = new File("C:\\Users\\raghu\\Downloads\\GA\\ Raghul1.png");
+	FileUtils.copyFile(src, des);
+}
+
+@Test(priority = 8)
+public void openParticularMob() throws InterruptedException {
+	List<WebElement> w1 = driver.findElements(By.cssSelector(prop.getProperty("amounts")));
+	for (WebElement i:w1) {
+		String B= i.getText();
+		if(B.equals("₹10,734")) {
+			i.click();
+		}
+		Thread.sleep(1000);	
+		}
+	String parent = driver.getWindowHandle();
+	Set<String> s = driver.getWindowHandles();
+	Iterator<String> I1 = s.iterator();
+	while(I1.hasNext()) {
+		String child = I1.next();
+		if(!parent.equals(child)) {
+			driver.switchTo().window(child);
+			driver.findElement(By.xpath(prop.getProperty("AddCart"))).click();
+			}
+	}
+
+}
+}
